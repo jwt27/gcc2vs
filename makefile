@@ -1,6 +1,5 @@
 CXX := g++
-CXXFLAGS += -pipe
-CXXFLAGS += -O3 -flto -flto-odr-type-merging
+CXXFLAGS += -O3 -flto
 CXXFLAGS += -Wall -Wextra
 
 .PHONY: all clean install
