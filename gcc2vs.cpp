@@ -35,7 +35,7 @@ std::string exec(const char* cmd)
 
 int main()
 {
-    path = exec("pwd");
+    path = exec("pwd -P"); // this is a different pwd than the one in /usr/bin/pwd? (which has a -W option)
     if (path[1] != ':') path = std::getenv("MSYS2_ROOT") + path;
     convert_slash(path);
     std::size_t pos = 0;
@@ -52,34 +52,38 @@ int main()
         {
             std::smatch r { };
             std::getline(std::cin, s);
-            if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): (fatal )?error:(.*)")))
+            if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): (fatal )?error:(.*)")))           // gcc error
             {
                 std::cerr << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): error : " << r[5] << '\n';
                 ++error;
             } 
-            else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): warning:(.*)")))
+            else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): warning:(.*)")))             // gcc warning
             {
                 std::cout << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): warning : " << r[4] << '\n';
             } 
-            else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+):(.*)")))
+            else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+):(.*)")))                      // gcc note
             {
                 std::cout << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): " << r[4] << '\n';
             } 
-            else if(std::regex_search(s, r, std::regex("((.*)included from )([^ ]+):([0-9]+)(.*)")))
+            else if(std::regex_search(s, r, std::regex("((.*)included from )([^ ]+):([0-9]+):([0-9]+)(.*)")))   // first "in file included from"
             {
                 std::cout << "In file included from:\n";
-                std::cout << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<",1):\n";
+                std::cout << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<',' << r[5] << "):\n";
             } 
-            else if(std::regex_search(s, r, std::regex("((.*)from )([^ ]+):([0-9]+)(.*)")))
+            else if(std::regex_search(s, r, std::regex("((.*)from )([^ ]+):([0-9]+)(.*)")))                     // subsequent "in file included from"
             {
                 std::cout << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<",1):\n";
+            }
+            else if(std::regex_search(s, r, std::regex("(.+): (In .*)")))                                       // In function/instantiation/constructor/etc
+            {
+                std::cout << convert_path(std::string(r[1])) << ": " << r[2] << '\n';
             }/*
             else if(std::regex_search(s, r, std::regex("( *)([^ ]+):([0-9]+):(.*)")))
             {
                 std::cerr << convert_path(std::string(r[2])) << '(' << r[3] << ",1): error: " << r[4] << '\n';
-                error = true;
+                ++error;
             } */
-            else if(std::regex_search(s, r, std::regex("( *)([^ ]+):(.*) Stop.")))
+            else if(std::regex_search(s, r, std::regex("( *)([^ ]+):(.*) Stop.")))                              // make error
             {
                 std::cerr << "make: error : " << r[3] << '\n';
                 ++error;
