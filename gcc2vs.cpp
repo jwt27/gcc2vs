@@ -1,35 +1,50 @@
 #include <iostream>
 #include <string>
 #include <regex>
-#include <cstdlib>
+#include <cstdio>
+#include <array>
 
 std::string path;
 
 void convert_slash(std::string& s)
 {
-    for (auto i = s.begin(); i != s.end(); ++i)
-        *i = *i == '/' ? '\\' : *i;
+    std::size_t pos = 0;
+    while ((pos = s.find('/', pos)) != std::string::npos)
+        s.replace(pos, 1, 1, '\\');
 }
 
 std::string convert_path(auto s)
 {
     convert_slash(s);
-    return path + s;
+    if (s[1] == ':') return s;
+    else return path + s;
 }
 
-int main(int argc, char** argv)
+// from http://stackoverflow.com/a/478960
+std::string exec(const char* cmd) 
 {
-    if (argc < 2) return 2;
-    if (argv[1][1] == ':') path = argv[1];
-    else
-    {
-        path = std::getenv("MSYS2_ROOT");
-        path += argv[1];
-    }
+    std::array<char, 128> buffer;
+    std::string result;
+    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    while (!feof(pipe.get()))
+        if (fgets(buffer.data(), 128, pipe.get()) != NULL)
+            result += buffer.data();
+    return result;
+}
+
+int main()
+{
+    path = exec("pwd");
+    if (path[1] != ':') path = std::getenv("MSYS2_ROOT") + path;
     convert_slash(path);
+    std::size_t pos = 0;
+    while ((pos = path.find('\n', pos)) != std::string::npos)
+        path.erase(pos, 1);
+        
     if (path.back() != '\\') path += '\\';
 
-    bool error = false;
+    int error = 0;
     std::string s;
     while (std::cin.good())
     {
@@ -37,12 +52,16 @@ int main(int argc, char** argv)
         {
             std::smatch r { };
             std::getline(std::cin, s);
-            if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): error:(.*)")))
+            if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): (fatal )?error:(.*)")))
             {
-                std::cerr << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): " << r[4] << '\n';
-                error = true;
+                std::cerr << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): error : " << r[5] << '\n';
+                ++error;
             } 
-            if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): (warning|note):(.*)")))
+            else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): warning:(.*)")))
+            {
+                std::cout << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): warning : " << r[4] << '\n';
+            } 
+            else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+):(.*)")))
             {
                 std::cout << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): " << r[4] << '\n';
             } 
@@ -54,16 +73,16 @@ int main(int argc, char** argv)
             else if(std::regex_search(s, r, std::regex("((.*)from )([^ ]+):([0-9]+)(.*)")))
             {
                 std::cout << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<",1):\n";
-            }
+            }/*
             else if(std::regex_search(s, r, std::regex("( *)([^ ]+):([0-9]+):(.*)")))
             {
                 std::cerr << convert_path(std::string(r[2])) << '(' << r[3] << ",1): error: " << r[4] << '\n';
                 error = true;
-            }
+            } */
             else if(std::regex_search(s, r, std::regex("( *)([^ ]+):(.*) Stop.")))
             {
-                std::cerr << "make: error: " << r[3] << '\n';
-                error = true;
+                std::cerr << "make: error : " << r[3] << '\n';
+                ++error;
             }
             else std::cout << s << '\n';
         }
