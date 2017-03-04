@@ -54,7 +54,7 @@ int main()
             std::getline(std::cin, s);
             if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): (fatal )?error:(.*)")))   // gcc error
             {
-                std::cerr << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): error : " << r[5] << '\n';
+                std::cout << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): error : " << r[5] << '\n';
                 ++error;
             } 
             else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): warning:(.*)"))) // gcc warning
@@ -84,12 +84,12 @@ int main()
             }
             else if(std::regex_search(s, r, std::regex("( *)([^ ]+):([0-9]+):(.*)")))   // linker error
             {
-                std::cerr << convert_path(std::string(r[2])) << '(' << r[3] << ",1): error : " << r[4] << '\n';
+                std::cout << convert_path(std::string(r[2])) << '(' << r[3] << ",1): error : " << r[4] << '\n';
                 ++error;
             }
             else if(std::regex_search(s, r, std::regex("( *)([^ ]+):(.*) Stop.")))  // make error
             {
-                std::cerr << "make: error : " << r[3] << '\n';
+                std::cout << "make: error : " << r[3] << '\n';
                 ++error;
             }
             else std::cout << s << '\n';
@@ -97,6 +97,7 @@ int main()
         catch (const std::exception& e)
         {
             std::cerr << " *** GCC2VS EXCEPTION: " << e.what() << '\n';
+            std::cerr << " ***  CAUSED BY THIS : " << s << '\n';
         }
     } 
     std::cout << std::flush;
