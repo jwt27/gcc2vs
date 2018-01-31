@@ -38,11 +38,11 @@ std::string convert_path(auto s)
 }
 
 // from http://stackoverflow.com/a/478960
-std::string exec(const char* cmd) 
+std::string exec(std::string cmd) 
 {
     std::array<char, 128> buffer;
     std::string result;
-    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
     if (!pipe) throw std::runtime_error("popen() failed!");
     while (!feof(pipe.get()))
         if (fgets(buffer.data(), 128, pipe.get()) != NULL)
@@ -52,7 +52,7 @@ std::string exec(const char* cmd)
 
 int main()
 {
-    path = exec("pwd -P"); // this is a different pwd than the one in /usr/bin/pwd? (which has a -W option)
+    path = exec("cygpath -w " + exec("pwd"));
     if (path[1] != ':') path = std::getenv("MSYS2_ROOT") + path;
     convert_slash(path);
     std::size_t pos = 0;
