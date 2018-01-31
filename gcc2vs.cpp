@@ -52,7 +52,7 @@ std::string exec(std::string cmd)
 
 int main()
 {
-    path = exec("cygpath -w " + exec("pwd"));
+    path = exec("cygpath -w \"" + exec("pwd") + '\"');
     if (path[1] != ':') path = std::getenv("MSYS2_ROOT") + path;
     convert_slash(path);
     std::size_t pos = 0;
