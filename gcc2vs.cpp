@@ -60,7 +60,7 @@ int main()
         path.erase(pos, 1);        
     if (path.back() != '\\') path += '\\';
 
-    int error = 0;
+    int errors = 0;
     std::string s;
     while (std::cin.good())
     {
@@ -71,7 +71,7 @@ int main()
             if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): (fatal )?error:(.*)")))   // gcc error
             {
                 std::cout << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): error : " << r[5] << '\n';
-                ++error;
+                ++errors;
             } 
             else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): warning:(.*)"))) // gcc warning
             {
@@ -101,12 +101,12 @@ int main()
             else if(std::regex_search(s, r, std::regex("( *)([^ ]+):([0-9]+):(.*)")))   // linker error
             {
                 std::cout << convert_path(std::string(r[2])) << '(' << r[3] << ",1): error : " << r[4] << '\n';
-                ++error;
+                ++errors;
             }
             else if(std::regex_search(s, r, std::regex("( *)([^ ]+):(.*) Stop.")))  // make error
             {
                 std::cout << "make: error : " << r[3] << '\n';
-                ++error;
+                ++errors;
             }
             else std::cout << s << '\n';
         }
@@ -117,5 +117,5 @@ int main()
         }
     } 
     std::cout << std::flush;
-    return error;
+    return errors;
 }
