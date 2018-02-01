@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdio>
 #include <array>
 
-std::string path;
+std::string path { };
 
 void convert_slash(std::string& s)
 {
@@ -92,12 +92,12 @@ int main(int argc, char** argv)
         if (path[1] != ':') path = std::getenv("MSYS2_ROOT") + path;
         convert_slash(path);
     }
-    std::size_t pos = 0;
+    std::size_t pos { 0 };
     while ((pos = path.find('\n', pos)) != std::string::npos)
         path.erase(pos, 1);
     if (path.back() != '\\') path += '\\';
 
-    int errors = 0;
+    int errors { 0 };
     std::string s;
     while (std::cin.good())
     {
