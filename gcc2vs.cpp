@@ -68,8 +68,8 @@ void print_help()
 
 int main(int argc, char** argv)
 {
-    auto* err_out = &std::cout;
-    auto* warn_out = &std::cout;
+    auto* err_out { &std::cout };
+    auto* warn_out { &std::cout };
 
     for (auto i = 1; i < argc; ++i)
     {
