@@ -1,5 +1,5 @@
 /****************************** gcc2vs *******************************
-Copyright (C) 2017  J.W. Jagersma
+Copyright (C) 2017-2018  J.W. Jagersma
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -55,7 +55,6 @@ void print_help()
 {
     std::cout <<
         "gcc2vs - convert gcc error messages to Visual Studio format.\n"
-        "(C) 2017-2018 J.W. Jagersma\n"
         "\n"
         "Usage:"
         "    gcc [...] 2>&1 | gcc2vs [options]\n"
