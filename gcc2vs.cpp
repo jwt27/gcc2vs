@@ -56,7 +56,7 @@ void print_help()
     std::cout <<
         "gcc2vs - convert gcc error messages to Visual Studio format.\n"
         "\n"
-        "Usage:"
+        "Usage:\n"
         "    gcc [...] 2>&1 | gcc2vs [options]\n"
         "\n"
         "Options:\n"
