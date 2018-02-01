@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <regex>
 #include <cstdio>
 #include <array>
@@ -50,14 +51,34 @@ std::string exec(std::string cmd)
     return result;
 }
 
-int main()
+void print_help()
 {
+    std::cout << "There are no command line options.\n";
+}
+
+int main(int argc, char** argv)
+{
+    for (auto i = 1; i < argc; ++i)
+    {
+        std::string_view arg { argv[i] };
+        if (arg == "--help")
+        {
+            print_help();
+            return 0;
+        }
+        else
+        {
+            std::cerr << "Unrecognized command line option: " << arg << " (try --help)\n";
+            return 1;
+        }
+    }
+
     path = exec("cygpath -w \"" + exec("pwd") + '\"');
     if (path[1] != ':') path = std::getenv("MSYS2_ROOT") + path;
     convert_slash(path);
     std::size_t pos = 0;
     while ((pos = path.find('\n', pos)) != std::string::npos)
-        path.erase(pos, 1);        
+        path.erase(pos, 1);
     if (path.back() != '\\') path += '\\';
 
     int errors = 0;

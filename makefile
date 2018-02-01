@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS += -O3 -flto
+CXXFLAGS += -O3 -flto -std=gnu++17
 CXXFLAGS += -Wall -Wextra
 
 .PHONY: all clean install uninstall
