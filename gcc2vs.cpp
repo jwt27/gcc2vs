@@ -23,12 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <array>
 
 std::string path { };
+char slash = '\\';
+char bad_slash = '/';
 
 void convert_slash(std::string& s)
 {
     std::size_t pos = 0;
-    while ((pos = s.find('/', pos)) != std::string::npos)
-        s.replace(pos, 1, 1, '\\');
+    while ((pos = s.find(bad_slash, pos)) != std::string::npos)
+        s.replace(pos, 1, 1, slash);
 }
 
 std::string convert_path(auto s)
@@ -60,9 +62,10 @@ void print_help()
         "    gcc [...] 2>&1 | gcc2vs [options]\n"
         "\n"
         "Options:\n"
+        "    --forward-slash        Use normal slash as path separator, instead of backslash.\n"
         "    --help                 Display this message.\n"
         "    --path=<...>           Override displayed working directory.\n"
-        "    --use-stderr=<type>    Output messages to stderr instead of stdout.\n"
+        "    --use-stderr=<type>    Print messages to stderr, instead of stdout.\n"
         "                           <type> can be one of: errors, warnings, both.\n";
 }
 
@@ -78,6 +81,11 @@ int main(int argc, char** argv)
         {
             print_help();
             return 0;
+        }
+        else if (arg == "--forward-slash")
+        {
+            slash = '/';
+            bad_slash = '\\';
         }
         else if (arg.compare("--path") >= 0)
         {
@@ -107,7 +115,7 @@ int main(int argc, char** argv)
     std::size_t pos { 0 };
     while ((pos = path.find('\n', pos)) != std::string::npos)
         path.erase(pos, 1);
-    if (path.back() != '\\') path += '\\';
+    if (path.back() != slash) path += slash;
 
     int errors { 0 };
     std::string s;
