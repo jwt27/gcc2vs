@@ -54,11 +54,15 @@ std::string exec(std::string cmd)
 void print_help()
 {
     std::cout <<
-        "   gcc2vs - convert gcc error messages to Visual Studio format.\n"
+        "gcc2vs - convert gcc error messages to Visual Studio format.\n"
+        "(C) 2017-2018 J.W. Jagersma\n"
         "\n"
-        "   Available options:"
-        "       --path[=]<...>      Override displayed working directory.\n"
-        "       --help              Display this message.\n";
+        "Usage:"
+        "    gcc [...] 2>&1 | gcc2vs [options]\n"
+        "\n"
+        "Options:\n"
+        "    --path[=]<...>      Override displayed working directory.\n"
+        "    --help              Display this message.\n";
 }
 
 int main(int argc, char** argv)
