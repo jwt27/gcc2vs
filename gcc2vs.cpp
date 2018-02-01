@@ -53,7 +53,12 @@ std::string exec(std::string cmd)
 
 void print_help()
 {
-    std::cout << "There are no command line options.\n";
+    std::cout <<
+        "   gcc2vs - convert gcc error messages to Visual Studio format.\n"
+        "\n"
+        "   Available options:"
+        "       --path[=]<...>      Override displayed working directory.\n"
+        "       --help              Display this message.\n";
 }
 
 int main(int argc, char** argv)
@@ -66,6 +71,11 @@ int main(int argc, char** argv)
             print_help();
             return 0;
         }
+        else if (arg.compare("--path") >= 0)
+        {
+            if (arg[6] == '=') path = arg.substr(7);
+            else if (++i < argc) path = argv[i];
+        }
         else
         {
             std::cerr << "Unrecognized command line option: " << arg << " (try --help)\n";
@@ -73,9 +83,12 @@ int main(int argc, char** argv)
         }
     }
 
-    path = exec("cygpath -w \"" + exec("pwd") + '\"');
-    if (path[1] != ':') path = std::getenv("MSYS2_ROOT") + path;
-    convert_slash(path);
+    if (path.empty())
+    {
+        path = exec("cygpath -w \"" + exec("pwd") + '\"');
+        if (path[1] != ':') path = std::getenv("MSYS2_ROOT") + path;
+        convert_slash(path);
+    }
     std::size_t pos = 0;
     while ((pos = path.find('\n', pos)) != std::string::npos)
         path.erase(pos, 1);
