@@ -1,5 +1,5 @@
 /****************************** gcc2vs *******************************
-Copyright (C) 2017-2018  J.W. Jagersma
+Copyright (C) 2017-2020  J.W. Jagersma
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ void convert_slash(std::string& s)
         s.replace(pos, 1, 1, slash);
 }
 
-std::string convert_path(auto s)
+std::string convert_path(std::string s)
 {
     convert_slash(s);
     if (s[1] == ':') return s;
@@ -127,22 +127,22 @@ int main(int argc, char** argv)
             std::getline(std::cin, s);
             if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): (fatal )?error:(.*)")))   // gcc error
             {
-                *err_out << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): error : " << r[5] << '\n';
+                *err_out << convert_path(std::string(r[1])) << ':' << r[2] << ':' << r[3] << ": error: " << r[5] << '\n';
                 ++errors;
-            } 
+            }
             else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): warning:(.*)"))) // gcc warning
             {
-                *warn_out << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): warning : " << r[4] << '\n';
-            } 
+                *warn_out << convert_path(std::string(r[1])) << ':' << r[2] << ':' << r[3] << ": warning: " << r[4] << '\n';
+            }
             else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+):(.*)")))  // gcc note
             {
                 *warn_out << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): " << r[4] << '\n';
-            } 
-            else if(std::regex_search(s, r, std::regex("((.*)included from )([^ ]+):([0-9]+):([0-9]+)(.*)")))   // first "in file included from"
+            }
+            else if(std::regex_search(s, r, std::regex("((.*)included from )([^ ]+):([0-9]+)(.*)")))   // first "in file included from"
             {
                 *warn_out << "In file included from:\n";
-                *warn_out << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<',' << r[5] << "):\n";
-            } 
+                *warn_out << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<",1):\n";
+            }
             else if(std::regex_search(s, r, std::regex("((.*)from )([^ ]+):([0-9]+)(.*)"))) // subsequent "in file included from"
             {
                 *warn_out << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<",1):\n";
