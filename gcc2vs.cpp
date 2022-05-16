@@ -125,42 +125,46 @@ int main(int argc, char** argv)
         {
             std::smatch r { };
             std::getline(std::cin, s);
-            if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): (fatal )?error:(.*)")))   // gcc error
+            if(std::regex_search(s, r, std::regex("^([^ ]+):([0-9]+):([0-9]+): (fatal )?error:(.*)")))   // gcc error
             {
                 *err_out << convert_path(std::string(r[1])) << ':' << r[2] << ':' << r[3] << ": error: " << r[5] << '\n';
                 ++errors;
             }
-            else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+): warning:(.*)"))) // gcc warning
+            else if(std::regex_search(s, r, std::regex("^([^ ]+):([0-9]+):([0-9]+): warning:(.*)"))) // gcc warning
             {
                 *warn_out << convert_path(std::string(r[1])) << ':' << r[2] << ':' << r[3] << ": warning: " << r[4] << '\n';
             }
-            else if(std::regex_search(s, r, std::regex("([^ ]+):([0-9]+):([0-9]+):(.*)")))  // gcc note
+            else if(std::regex_search(s, r, std::regex("^([^ ]+):([0-9]+):([0-9]+):(.*)")))  // gcc note
             {
                 *warn_out << convert_path(std::string(r[1])) << '(' << r[2] << ',' << r[3] << "): " << r[4] << '\n';
             }
-            else if(std::regex_search(s, r, std::regex("((.*)included from )([^ ]+):([0-9]+)(.*)")))   // first "in file included from"
+            else if(std::regex_search(s, r, std::regex("^ +(inlined from '.+') at ([^ ]+):([0-9]+):([0-9]+)([,:])")))  // "inlined from"
+            {
+                *warn_out << convert_path(std::string(r[2])) << '(' << r[3] << ',' << r[4] << "): " << r[1] << r[5] << '\n';
+            }
+            else if(std::regex_search(s, r, std::regex("^((.*)included from )([^ ]+):([0-9]+)(.*)")))   // first "in file included from"
             {
                 *warn_out << "In file included from:\n";
                 *warn_out << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<",1):\n";
             }
-            else if(std::regex_search(s, r, std::regex("((.*)from )([^ ]+):([0-9]+)(.*)"))) // subsequent "in file included from"
+            else if(std::regex_search(s, r, std::regex("^((.*)from )([^ ]+):([0-9]+)(.*)"))) // subsequent "in file included from"
             {
                 *warn_out << "                       " << convert_path(std::string(r[3])) << '(' << r[4] <<",1):\n";
             }
-            else if(std::regex_search(s, r, std::regex("(.+): (In .*)")))   // in function/instantiation/constructor/etc
+            else if(std::regex_search(s, r, std::regex("^(.+): (In .*)")))   // in function/instantiation/constructor/etc
             {
                 *warn_out << convert_path(std::string(r[1])) << ": " << r[2] << '\n';
             }
-            else if(std::regex_search(s, r, std::regex("(make\\[[0-9]+\\]: \\[)(.*):([0-9]+):(.*)(\\(ignored\\))")))    // ignored error
+            else if(std::regex_search(s, r, std::regex("^(make\\[[0-9]+\\]: \\[)(.*):([0-9]+):(.*)(\\(ignored\\))")))    // ignored error
             {
                 *warn_out << r[1] << convert_path(std::string(r[2])) << '(' << r[3] << ",1): error : " << r[4] << r[5] << '\n';
             }
-            else if(std::regex_search(s, r, std::regex("( *)([^ ]+):([0-9]+):(.*)")))   // linker error
+            else if(std::regex_search(s, r, std::regex("^( *)([^ ]+):([0-9]+):(.*)")))   // linker error
             {
                 *err_out << convert_path(std::string(r[2])) << '(' << r[3] << ",1): error : " << r[4] << '\n';
                 ++errors;
             }
-            else if(std::regex_search(s, r, std::regex("( *)([^ ]+):(.*) Stop.")))  // make error
+            else if(std::regex_search(s, r, std::regex("^( *)([^ ]+):(.*) Stop.")))  // make error
             {
                 *err_out << "make: error : " << r[3] << '\n';
                 ++errors;

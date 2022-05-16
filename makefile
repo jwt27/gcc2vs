@@ -13,7 +13,7 @@ clean:
 	-rm -f gcc2vs.exe
 
 install: gcc2vs.exe
-	mkdir -p /usr/bin
+	mkdir -p /usr/local/bin
 	cp -f gcc2vs.exe /usr/local/bin/
 
 uninstall:
